@@ -1,8 +1,11 @@
 package com.example.ArticleManagerment.service.implement;
 
+import com.example.ArticleManagerment.Repository.InvalidatedTokenRepository;
 import com.example.ArticleManagerment.Repository.UserRepository;
 import com.example.ArticleManagerment.dto.reponse.AuthenticationResponse;
+import com.example.ArticleManagerment.dto.reponse.IntrospectResponse;
 import com.example.ArticleManagerment.dto.request.AuthenticationRequest;
+import com.example.ArticleManagerment.dto.request.IntrospectRequest;
 import com.example.ArticleManagerment.entity.Role;
 import com.example.ArticleManagerment.entity.User;
 import com.example.ArticleManagerment.enums.Status;
@@ -12,7 +15,9 @@ import com.example.ArticleManagerment.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
@@ -27,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -39,7 +45,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class AuthenticationServiceIpm implements AuthenticationService {
     UserRepository userRepository;
-
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -59,7 +65,7 @@ public class AuthenticationServiceIpm implements AuthenticationService {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
                 ()-> new RuntimeException("User not found")
         );
-        if (user.getStatus().equals(Status.Active)){
+        if (user.getStatus().equals(Status.Inactive)){
             return AuthenticationResponse.builder()
                     .authenticated(false)
                     .build();
@@ -73,6 +79,35 @@ public class AuthenticationServiceIpm implements AuthenticationService {
                 .authenticated(true)
                 .build();
     }
+
+    @Override
+    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException{
+        var token = request.getToken();
+        boolean isValid = true;
+        try {
+            verifyToken(token,false);
+        }catch (Exception e){
+            isValid = false;
+        }
+        return  IntrospectResponse.builder()
+                .valid(isValid)
+                .build();
+    }
+
+    private SignedJWT verifyToken(String token,Boolean isRefresh) throws ParseException,JOSEException{
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT =SignedJWT.parse(token);
+        Date expityTime = (isRefresh)? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(REFRESHABLE_DURATION,ChronoUnit.SECONDS).toEpochMilli())
+                :signedJWT.getJWTClaimsSet().getExpirationTime();
+        var verifed = signedJWT.verify(verifier);
+        if (!verifed && expityTime.after(new Date())) throw new AppException(Errorcode.UNAUTHENTICATED);
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) throw new
+                AppException(Errorcode.UNAUTHENTICATED);
+        return signedJWT;
+    }
+
+
+
 
     private String generateToken(User user){
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
