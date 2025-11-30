@@ -6,6 +6,8 @@ import com.example.ArticleManagerment.dto.reponse.AuthenticationResponse;
 import com.example.ArticleManagerment.dto.reponse.IntrospectResponse;
 import com.example.ArticleManagerment.dto.request.AuthenticationRequest;
 import com.example.ArticleManagerment.dto.request.IntrospectRequest;
+import com.example.ArticleManagerment.dto.request.LogoutRequest;
+import com.example.ArticleManagerment.entity.InvalidatedToken;
 import com.example.ArticleManagerment.entity.Role;
 import com.example.ArticleManagerment.entity.User;
 import com.example.ArticleManagerment.enums.Status;
@@ -139,6 +141,22 @@ public class AuthenticationServiceIpm implements AuthenticationService {
 
         }
         return stringJoiner.toString();
+    }
+
+    @Override
+    public void logout(LogoutRequest request) throws ParseException,JOSEException{
+        try {
+            var signToken = verifyToken(request.getToken(), true);
+            String jwtId = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(jwtId)
+                    .expiryTime(expiryTime)
+                    .build();
+            invalidatedTokenRepository.save(invalidatedToken);
+        }catch (AppException exception){
+            System.out.println("Token invalid, cannot logout");
+        }
     }
 
 }
