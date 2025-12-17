@@ -22,8 +22,11 @@ public enum Errorcode {
     EMAIL_NOT_FOUND(1013, "Email không tồn tại"),
     EMAIL_INVALID(1014, "Email không hợp lệ"),
     INVALID_CREDENTIALS(1015, "Thông tin đăng nhập không hợp lệ"),
+    INVALID_REGISTRATION_START(1017,"Ngày bắt đầu đăng ký phải sớm hơn hoặc bằng ngày bắt đầu viết bài"),
+    INVALID_REGISTRATION_END(1018,"Ngày kết thúc đăng ký phải sau ngày bắt đầu đăng ký và không được sau ngày kết thúc viết bài"),
+    INVALID_WRITING_DATE_RANGE(1019,"Ngày kết thúc viết bài phải sau ngày bắt đầu viết bài"),
+    INVALID_REGISTRATION_DATE_RANGE(1019,"Ngày kết thúc đăng kí phải sau ngày bắt đầu đăng kí"),
     PHONE_INVALID(1016, "Số điện thoại không hợp lệ")
-
     ;
 
     private int code;

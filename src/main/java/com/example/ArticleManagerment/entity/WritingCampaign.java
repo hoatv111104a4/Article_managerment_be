@@ -42,7 +42,7 @@ public class WritingCampaign {
     @Column(name = "writing_end")
     private LocalDateTime writingEnd;
 
-    @Column(name = "campaign_number")
+    @Column(name = "campaign_number",insertable = false,updatable = false)
     private Integer campaignNumber;
 
     @Enumerated(EnumType.STRING)
