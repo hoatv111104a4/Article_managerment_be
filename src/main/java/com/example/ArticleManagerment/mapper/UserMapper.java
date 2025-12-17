@@ -5,6 +5,7 @@ import com.example.ArticleManagerment.dto.request.UserCreationReq;
 import com.example.ArticleManagerment.dto.request.UserUpdateReq;
 import com.example.ArticleManagerment.entity.Role;
 import com.example.ArticleManagerment.entity.User;
+import com.example.ArticleManagerment.enums.Status;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -24,6 +25,11 @@ public interface UserMapper {
     @Mapping(target = "role",source = "roleId",qualifiedByName = "mapRole")
     void updateUser(@MappingTarget User user , UserUpdateReq request);
 
+    default void updateStatus(@MappingTarget User user, String status){
+        if (status!=null){
+            user.setStatus(Status.valueOf(status));
+        }
+    }
 
     @Named("mapRole")
     default Role mapRoleIdToRole(UUID roleId) {
@@ -40,6 +46,8 @@ public interface UserMapper {
         }
         return role.getName();
     }
+
+
 
 
 

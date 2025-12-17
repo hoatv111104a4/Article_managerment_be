@@ -47,7 +47,7 @@ public class TopicController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)LocalDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)LocalDateTime toDate
             ){
-        String sortField = (sortBy != null && sortBy.isEmpty())? sortBy : "createdAt";
+        String sortField = (sortBy != null &&  !sortBy.isEmpty())? sortBy : "createdAt";
         Pageable pageable = PageRequest.of(page,size,
                 sortDir.equalsIgnoreCase("asc") ?
                 Sort.by(sortField).ascending() : Sort.by(sortField).descending()

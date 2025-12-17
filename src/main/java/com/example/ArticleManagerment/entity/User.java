@@ -3,6 +3,7 @@ package com.example.ArticleManagerment.entity;
 import com.example.ArticleManagerment.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
@@ -47,6 +48,7 @@ public class User {
     private String refreshToken;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private LocalDate createdAt;
 
     @UpdateTimestamp

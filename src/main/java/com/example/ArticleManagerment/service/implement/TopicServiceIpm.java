@@ -13,6 +13,7 @@ import com.example.ArticleManagerment.exception.Errorcode;
 import com.example.ArticleManagerment.mapper.TopicMapper;
 import com.example.ArticleManagerment.service.TopicService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -23,8 +24,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
-public class    TopicServiceIpm implements TopicService {
+@RequiredArgsConstructor
+public class TopicServiceIpm implements TopicService {
     private final TopicRepository topicRepository;
     private final TopicMapper topicMapper;
     private final UserRepository userRepository;

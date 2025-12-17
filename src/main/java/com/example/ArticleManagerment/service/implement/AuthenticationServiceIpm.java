@@ -74,7 +74,11 @@ public class AuthenticationServiceIpm implements AuthenticationService {
         }
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(),user.getPassword());
-        if (!authenticated) throw new AppException(Errorcode.UNAUTHENTICATED);
+        if (!authenticated){
+            return AuthenticationResponse.builder()
+                    .authenticated(false)
+                    .build();
+        };
         var token = generateToken(user);
         return AuthenticationResponse.builder()
                 .token(token)
